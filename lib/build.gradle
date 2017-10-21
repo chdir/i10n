@@ -1,0 +1,53 @@
+apply plugin: 'com.android.library'
+
+repositories {
+    maven {
+        url 'https://dl.bintray.com/alexanderr/maven'
+    }
+}
+
+final int nativeVersionCode = 0
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion '25.0.2'
+    defaultConfig {
+        minSdkVersion 15
+        targetSdkVersion 25
+        versionCode 1
+        versionName '0.2'
+        testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
+
+        buildConfigField 'int', 'NATIVE_VER', "$nativeVersionCode"
+
+        externalNativeBuild {
+            cmake {
+                arguments "-DI10N_NATIVE_VER:STRING=$nativeVersionCode", "-DANDROID_PLATFORM=android-15", "-DCMAKE_BUILD_TYPE=Release", "-DANDROID_TOOLCHAIN=gcc", "-DANDROID_ARM_MODE=thumb", "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON"
+                cFlags '-std=gnu11'
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path 'src/main/jni/CMakeLists.txt'
+        }
+    }
+}
+
+dependencies {
+    compile 'net.sf.xfd:common:0.2'
+
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    testCompile 'junit:junit:4.12'
+}
+
+if (project.hasProperty('deploymentConfig')) {
+    apply from: file("$rootProject.projectDir/deployment.gradle")
+}
